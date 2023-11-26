@@ -19,6 +19,16 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//add new rout to display a single URL
+app.get("/urls/:id", (req, res) => {
+  
+  const templateVars = { 
+    id: req.params.id, //id - is a rout parameter
+    longURL: urlDatabase[req.params.id] //associated longURL with it's id
+  }; 
+  res.render("urls_show", templateVars);
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
