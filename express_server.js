@@ -10,18 +10,31 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+//create a user object
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk",
+  },
+};
+
 app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
+
 
 //Generate a Random Short URL ID
 let allCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 let strLength = 6;
 
 const generateRandomString = function (allCharacters, strLength) {
-
   let randomString = '';
-
   for (let i = 0; i < strLength; i++) {
     let randomPosition = Math.floor(Math.random() * allCharacters.length);
     randomString += allCharacters.substring(randomPosition, randomPosition + 1);
@@ -100,11 +113,14 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+
 //Add POST route for /urls/:id to update a resource
 app.post("/urls/:id", (req, res) => {
   urlDatabase[req.params.id] = req.body.newLongURL;
   res.redirect("/urls");
 });
+
+
 
 //Add a POST route that removes a URL resource
 app.post("/urls/:id/delete", (req, res) => {
@@ -112,13 +128,16 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+
+
 //add a POSt rout to handle user login
 app.post("/login", (req, res) => {
   const username = req.body.username;
-  //const { username } = req.body;
   res.cookie("username", username);
   res.redirect("/urls");
 });
+
+
 
 //display the username
 app.get("/urls", (req, res) => {
@@ -129,6 +148,9 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+
+
+
 //add a POSt rout to handle user logout
 app.post("/logout", (req, res) => {
   const username = req.body.username;
@@ -137,10 +159,27 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+
+
+
+
 app.get("/register", (req, res) => {
-  // const username = req.body.username;
-  // res.cookie("username", username);
   res.render("registration");
+});
+
+//handle a registration form
+app.post("/register", (req, res) => {
+
+  const newId = generateRandomString(allCharacters, strLength);
+  const email = req.body.email;
+  const password = req.body.password;
+
+  users[newId] = { id: newId, email: email, password: password }; //add use to database
+
+  res.cookie("user_id", users[newId].id); //set cookie containing the user's id
+
+  res.redirect("/urls");
+
 });
 
 
