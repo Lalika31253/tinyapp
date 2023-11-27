@@ -137,6 +137,11 @@ app.post("/logout", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get("/register", (req, res) => {
+  // const username = req.body.username;
+  // res.cookie("username", username);
+  res.render("registration");
+});
 
 
 
