@@ -12,6 +12,21 @@ app.set("view engine", "ejs");
 
 app.use(express.urlencoded({ extended: true }));
 
+//Generate a Random Short URL ID
+let allCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+let strLength = 6;
+
+const generateRandomString = function (allCharacters, strLength) {
+
+  let randomString = '';
+
+  for (let i = 0; i < strLength; i++) {
+    let randomPosition = Math.floor(Math.random() * allCharacters.length);
+    randomString += allCharacters.substring(randomPosition, randomPosition + 1);
+  }
+  return randomString;
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
