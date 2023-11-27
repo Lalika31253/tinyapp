@@ -93,7 +93,7 @@ app.get("/hello", (req, res) => {
 
 //Add POST route for /urls/:id to update a resource
 app.post("/urls/:id", (req, res) => {
-  urlDatabase[req.params.id] = req.body.newURL;
+  urlDatabase[req.params.id] = req.body.newLongURL;
   res.redirect("/urls");
 });
 
@@ -102,6 +102,13 @@ app.post("/urls/:id/delete", (req, res) => {
   delete urlDatabase[req.params.id];
     res.redirect("/urls");
 });
+
+//add a POSt rout to handle user login
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie("username", username);
+  res.redirect("/urls");
+})
 
 
 
