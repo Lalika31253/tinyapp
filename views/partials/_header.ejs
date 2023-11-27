@@ -20,13 +20,20 @@
     </div>
 
     <div>
-      <form method="post" action="/login">
+      <% if (username) { %>
+      <form method="post" action="/logout">
         <h5 class="card-text"> Logged in as: <%= username %> User!
-          <input type="text" name="username" placeholder="Username">
-          <button type="submit" class="btn btn-outline-secondary">Login</button>
+          <button type="submit" class="btn btn-outline-secondary">Logout</button>
         </h5>
-        
       </form>
+      <% } else { %>
+        <form method="post" action="/login">
+          <h5 class="card-text"> Welcome: <%= username %>
+            <input type="text" name="username" placeholder="Username">
+            <button type="submit" class="btn btn-outline-secondary">Login</button>
+          </h5>
+        </form>
+        <% } %>
 
     </div>
 

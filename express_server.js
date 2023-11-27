@@ -114,8 +114,8 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //add a POSt rout to handle user login
 app.post("/login", (req, res) => {
-  //const username = req.body.username;
-  const { username } = req.body;
+  const username = req.body.username;
+  //const { username } = req.body;
   res.cookie("username", username);
   res.redirect("/urls");
 });
@@ -128,6 +128,15 @@ app.get("/urls", (req, res) => {
   };
   res.render("urls_index", templateVars);
 });
+
+//add a POSt rout to handle user logout
+app.post("/logout", (req, res) => {
+  const username = req.body.username;
+  //const { username } = req.body;
+  res.clearCookie("username", username);
+  res.redirect("/urls");
+});
+
 
 
 
