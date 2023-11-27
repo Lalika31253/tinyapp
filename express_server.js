@@ -27,7 +27,7 @@ const generateRandomString = function (allCharacters, strLength) {
   return randomString;
 };
 
-app.get("/", (req, res) => {
+app.get("/", (req, res) => { //
   res.send("Hello!");
 });
 
@@ -36,14 +36,25 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+
+//POST route to receive the form submission (..urls/new)
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
+
+  const newShortId = generateRandomString(allCharacters, strLength);
+  const newLongURL = req.body.longURL;
+  //save data to our data base
+  urlDatabase[newShortId] = newLongURL;
+  //console.log(req.body.longURL);
+  //console.log(req.body); // Log the POST request body to the console
   res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
+
+
 
 //add new rout to display a single URL
 app.get("/urls/:id", (req, res) => {
