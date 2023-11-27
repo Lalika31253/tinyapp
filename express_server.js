@@ -91,6 +91,11 @@ app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+//Add POST route for /urls/:id to update a resource
+app.post("/urls/:id", (req, res) => {
+  urlDatabase[req.params.id] = req.body.newURL;
+  res.redirect("/urls");
+});
 
 //Add a POST route that removes a URL resource
 app.post("/urls/:id/delete", (req, res) => {
