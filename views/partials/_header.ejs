@@ -20,16 +20,16 @@
     </div>
 
     <div>
-      <% if (username) { %>
+      <% if (user_id) { %> 
       <form method="post" action="/logout">
-        <h5 class="card-text"> Logged in as: <%= username %> User!
+        <h5 class="card-text"> Logged in as: <%= user[user_id].email %> User!
           <button type="submit" class="btn btn-outline-secondary">Logout</button>
         </h5>
       </form>
       <% } else { %>
         <form method="post" action="/login">
-          <h5 class="card-text"> Welcome: <%= username %>
-            <input type="text" name="username" placeholder="Username">
+          <h5 class="card-text"> Welcome: <%= user_id %>
+            <input type="text" name="user_id" placeholder="Username">
             <button type="submit" class="btn btn-outline-secondary">Login</button>
           </h5>
         </form>

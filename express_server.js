@@ -47,19 +47,23 @@ app.get("/", (req, res) => { //
   res.send("Hello!");
 });
 
-
+//display the username
 app.get("/urls", (req, res) => {
+  const user_id = req.cookies["user_id"]; //set user id cookie
   const templateVars = {
     urls: urlDatabase, //keep track of a URLs
-    username: req.cookies["username"] //pass user name from cookies
+    user: users[user_id], //pass user from the object
+    user_id: user_id
   };
   res.render("urls_index", templateVars);
 });
 
 
+
 app.get("/urls/new", (req, res) => {
   const templateVars = { //pass user name from cookies
-    username: req.cookies["username"]
+    user_id: req.cookies["user_id"], //set user id cookie
+    user: users //pass user from the object
   };
   res.render("urls_new", templateVars);
 });
@@ -73,12 +77,7 @@ app.post("/urls", (req, res) => {
 
   //save data to our data base
   urlDatabase[newShortId] = newLongURL;
-  // const templateVars = {
-  //   id: newShortId,
-  //   longURL: newLongURL
-  // }
-  //console.log(req.body.longURL);
-  //console.log(req.body); // Log the POST request body to the console
+ 
   res.redirect(`/urls`);
 });
 
@@ -86,7 +85,6 @@ app.post("/urls", (req, res) => {
 //GET route to handle short urls
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id];
-  console.log("Long URL: id", longURL);
   res.redirect(longURL);
 });
 
@@ -96,12 +94,14 @@ app.get("/u/:id", (req, res) => {
 app.get("/urls/:id", (req, res) => {
 
   const templateVars = {
-    //id: req.params.id, //id - is a rout parameter
-    username: req.cookies["username"], //pass user name from cookies
+    id: req.params.id, //id - is a rout parameter
+    user_id: req.cookies["user_id"], //set user id cookie
+    user: users,
     longURL: urlDatabase[req.params.id] //associated longURL with it's id
   };
   res.render("urls_show", templateVars);
 });
+
 
 
 app.get("/urls.json", (req, res) => {
@@ -129,33 +129,31 @@ app.post("/urls/:id/delete", (req, res) => {
 });
 
 
+app.get("/login", (req, res) => {
+  const templateVars = {
+    newLongURL: urlDatabase[req.params.id],
+    user_id: req.cookies["user_id"],
+    user: users
+  };
+  res.render('login', templateVars);
+});
+
+
 
 //add a POSt rout to handle user login
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie("username", username);
+  const user_id = req.body.user_id;
+  res.cookie("user_id", user_id)
+  
   res.redirect("/urls");
 });
 
 
 
-//display the username
-app.get("/urls", (req, res) => {
-  const templateVars = {
-    username: req.cookies["username"],
-    urls: urlDatabase
-  };
-  res.render("urls_index", templateVars);
-});
-
-
-
-
 //add a POSt rout to handle user logout
 app.post("/logout", (req, res) => {
-  const username = req.body.username;
-  //const { username } = req.body;
-  res.clearCookie("username", username);
+  const user_id = req.body.user_id;
+  res.clearCookie("user_id", user_id) //set user id cookie)
   res.redirect("/urls");
 });
 
@@ -167,18 +165,40 @@ app.get("/register", (req, res) => {
   res.render("registration");
 });
 
+
 //handle a registration form
 app.post("/register", (req, res) => {
-
+//pull data off the body object
   const newId = generateRandomString(allCharacters, strLength);
   const email = req.body.email;
   const password = req.body.password;
 
+   if (!email || !password) {
+    res.status(400).send("Provide email and a password");
+  };
+
+
+  //lookup the user based on provided email
+let foundUser;
+
+for (const userId in users) {
+  const user = users[userId];
+
+  if(user.email === email) {
+    return foundUser;
+  };
+};
+
+  if(!foundUser) {
+    res.status(400).send("No user found");
+  };
+
+
   users[newId] = { id: newId, email: email, password: password }; //add use to database
-
-  res.cookie("user_id", users[newId].id); //set cookie containing the user's id
-
+  res.cookie("user_id", id); //set cookies
   res.redirect("/urls");
+
+
 
 });
 
