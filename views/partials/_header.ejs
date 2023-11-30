@@ -22,7 +22,7 @@
     <div>
       <% if (user_id) { %> 
       <form method="post" action="/logout">
-        <h5 class="card-text"> Logged in as: <%= user[user_id].email %> User!
+        <h5 class="card-text"> Logged in as: <%= user_id %> User!
           <button type="submit" class="btn btn-outline-secondary">Logout</button>
         </h5>
       </form>
