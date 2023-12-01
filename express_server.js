@@ -168,6 +168,7 @@ app.post("/login", (req, res) => {
   };
 
   if (user.email !== email || user.password !== password) {
+    console.log("Checking email", user.email);
     return res.status(403).send("Incorrect email or password");
   };
 
