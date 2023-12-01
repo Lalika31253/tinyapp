@@ -18,8 +18,8 @@ const urlDatabase = {
 const users = {
   userRandomID: {
     id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    email: "a@example.com",
+    password: "111",
   },
   user2RandomID: {
     id: "user2RandomID",
@@ -48,45 +48,43 @@ const generateRandomString = function (allCharacters, strLength) {
 const getUserByEmail = function (email) {
 
   for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      return user;
+    if (users[userId].email === email) {
+      return users[userId];
     };
   };
   return null;
 
 }
 
-//GET for the home route
+//GET the home route
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
 
-//GET for /urls route
+//display list of URLs
 app.get("/urls", (req, res) => {
-  const user_id = req.cookies["user_id"]; //set user id cookie
+  const user_id = req.cookies.user_id; //set user id cookie
   const templateVars = {
     urls: urlDatabase, //keep track of a URLs
-    user: users[user_id], //pass user from the object
-    user_id: user_id
+    user: users[user_id],
   };
   res.render("urls_index", templateVars);
 });
 
 
-//GET for /urls/new route
+//display a form for creating a new URL
 app.get("/urls/new", (req, res) => {
   const templateVars = { //pass user name from cookies
-    user_id: req.cookies["user_id"], //set user id cookie
+    user_id: req.cookies.user_id,
     user: users, //pass user from the object
-    longURL: urlDatabase[req.params.id] //passing the longURL to be displayed on the page
   };
+
   res.render("urls_new", templateVars);
 });
 
 
-//POST route to receive the form submission (..urls/new)
+//POST route to receive the form submission of new URL
 app.post("/urls", (req, res) => {
   const newShortId = generateRandomString(allCharacters, strLength);
   const newLongURL = req.body.longURL;
@@ -103,12 +101,12 @@ app.get("/u/:id", (req, res) => {
 });
 
 
-//add new rout to display a single URL
+//rout to display a single URL and its details
 app.get("/urls/:id", (req, res) => {
 
   const templateVars = {
     id: req.params.id, //id - is a rout parameter
-    user_id: req.cookies["user_id"], //set user id cookie
+    user_id: req.cookies.user_id, //set user id cookie
     user: users,
     longURL: urlDatabase[req.params.id] //associated longURL with it's id
   };
@@ -129,11 +127,7 @@ app.get("/hello", (req, res) => {
 
 //POST route for /urls/:id to update a resource
 app.post("/urls/:id", (req, res) => {
-  const newLongURL = req.body.newURL;
-  urlDatabase[req.params.id] = {
-    longURL: newLongURL,
-  }
-
+  urlDatabase[req.params.id] = req.body.newURL
   res.redirect("/urls");
 });
 
@@ -149,8 +143,8 @@ app.post("/urls/:id/delete", (req, res) => {
 //GET login route
 app.get("/login", (req, res) => {
   const templateVars = {
-    newLongURL: urlDatabase[req.params.id],
-    user_id: req.cookies["user_id"],
+    longURL: urlDatabase[req.params.id],
+    user_id: req.cookies.user_id,
     user: users
   };
   res.render('login', templateVars);
@@ -159,32 +153,55 @@ app.get("/login", (req, res) => {
 
 //POST route to handle user login
 app.post("/login", (req, res) => {
-  const user_id = req.body.user_id;
-  res.cookie("user_id", user_id)
+  const email = req.body.email;
+  const password = req.body.password;
+  const userId = generateRandomString(allCharacters, strLength);
+
+  //lookup the user based on provided email
+  const user = getUserByEmail(email, users);
+
+  // add user to user DB
+  users[userId] = { id: userId, email: email, password: password };
+
+  if (!email || !password) {
+    return res.status(403).send("Provide email and a password");
+  };
+
+  if (user.email !== email || user.password !== password) {
+    return res.status(403).send("Incorrect email or password");
+  };
+
+
+  res.cookie("user_id", userId);
+  res.cookie("email", email);
+  res.cookie("password", password);
+
   res.redirect("/urls");
+
 });
 
 
 //POST to handle user logout
 app.post("/logout", (req, res) => {
   const user_id = req.body.user_id;
-  const email = req.body.email;
+  //const email = req.body.email;
   res.clearCookie("user_id", user_id); //Clear user id cookie on logout
-  res.clearCookie("email", email); //Clear user email cookie on logout
-  res.redirect("/urls");
+  // res.clearCookie("email", email); //Clear user email cookie on logout
+  // res.clearCookie("password", password); //Clear user email cookie on logout
+  res.redirect("/login");
 });
 
 
-//GET to handle registration
+//GET to handle registration page
 app.get("/register", (req, res) => {
   res.render("registration");
 });
 
 
-//POST to handle a registration
+//POST to handle a registration page
 app.post("/register", (req, res) => {
   //pull data off the body object
-  const newId = generateRandomString(allCharacters, strLength);
+  const userId = generateRandomString(allCharacters, strLength);
   const email = req.body.email;
   const password = req.body.password;
 
@@ -193,16 +210,18 @@ app.post("/register", (req, res) => {
   };
 
   //lookup the user based on provided email
-  const foundUser = getUserByEmail(email);
+  const user = getUserByEmail(email);
 
-  if (foundUser) {
+  if (user) {
     return res.status(400).send("The user with such an email already exists");
   };
 
   //Passing user into to users object
-  users[newId] = { id: newId, email: email, password: password }; //add use to database
-  res.cookie("user_id", newId); //set cookies
+  users[userId] = { id: userId, email: email, password: password }; //add use to database
+
+  res.cookie("user_id", userId); //set cookies
   res.cookie("email", email);
+  res.cookie("password", password);
   res.redirect("/urls");
 });
 
