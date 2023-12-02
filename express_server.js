@@ -59,8 +59,20 @@ const getUserByEmail = function (email) {
     };
   };
   return null;
-
 }
+
+const urlsForUser = function (urlDatabase, id) {
+  const newDB = {};
+
+  const user_id = req.cookies.user_id; //set user id cookie
+  for (let URL in urlDatabase) {
+    const userID = urlDatabase[URL].userID;
+    if (userID === user_id) {
+      newDB[URL] = urlDatabase[URL];
+    };
+  };
+  return newDB;
+};
 
 //GET the home route
 app.get("/", (req, res) => {
@@ -72,16 +84,15 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   const user_id = req.cookies.user_id; //set user id cookie
 
-  if (!user_id) {
-    res.redirect('/login');
-  };
+  // if (!user_id) {
+  //   return res.redirect('/urls');
+  // };
 
   const templateVars = {
     urls: urlDatabase, //keep track of a URLs
     user: users[user_id],
     user_id: req.cookies.user_id
   };
-
 
   res.render("urls_index", templateVars);
 });
@@ -91,14 +102,14 @@ app.get("/urls", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const user_id = req.cookies.user_id;
   const templateVars = { //pass user name from cookies
-    //user_id: req.cookies.user_id,
+    user_id: req.cookies.user_id,
     //urls: urlDatabase,
     user: users, //pass user from the object
   };
 
   if (!user_id) {
-    res.redirect('/login');
-  }
+    return res.redirect('/login');
+  };
 
   res.render("urls_new", templateVars);
 });
@@ -110,6 +121,10 @@ app.post("/urls", (req, res) => {
   const newLongURL = req.body.longURL;
   const user_id = req.cookies.user_id;
 
+  if (!user_id) {
+    return res.redirect('/login');
+  };
+
   //save data to our data base
   urlDatabase[newShortId] = { longURL: newLongURL, userID: user_id };
   res.redirect('/urls');
@@ -120,12 +135,19 @@ app.post("/urls", (req, res) => {
 app.get("/u/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id].longURL;
 
-  res.redirect(longURL);s
+  res.redirect(longURL); 
 });
 
 
 //rout to display a single URL and its details
 app.get("/urls/:id", (req, res) => {
+
+  const user_id = req.cookies.user_id;
+  console.log("User id", user_id);
+
+  if (!user_id) { // check if user is logged in or not
+    return res.redirect('/login');
+  };
 
   const templateVars = {
     id: req.params.id, //id - is a rout parameter
@@ -133,6 +155,7 @@ app.get("/urls/:id", (req, res) => {
     user: users,
     longURL: urlDatabase[req.params.id].longURL //associated longURL with it's id
   };
+
   res.render("urls_show", templateVars);
 });
 
@@ -151,7 +174,26 @@ app.get("/hello", (req, res) => {
 //POST route for /urls/:id to update a resource
 app.post("/urls/:id", (req, res) => {
   const newLongURL = req.body.newURL;
-  urlDatabase[req.params.id] = { longURL: newLongURL, userID: user_id };
+  const urlID = req.params.id;
+  const user_id = req.cookies.user_id;
+
+  //urlDatabase[req.params.id] = { longURL: newLongURL, userID: user_id };
+  if (!user_id) { //check if user is logged in
+    return res.status(400).send("Please log in");
+  };
+
+  if (!urlDatabase[urlID]) { //check if URL ID exists in DB
+    return res.status(404).send("URL ID not found");
+  };
+
+  if (urlDatabase[urlID].userID !== user_id) { // check if user owns the URL
+    return res.status(403).send("You don't own this URL");
+  };
+
+  //update
+  urlDatabase[urlID] = { longURL: newLongURL, userID: user_id };
+  //urlDatabase[urlID].longURL = newLongURL;
+
   res.redirect("/urls");
 });
 
@@ -159,6 +201,21 @@ app.post("/urls/:id", (req, res) => {
 
 //POST route that removes a URL resource
 app.post("/urls/:id/delete", (req, res) => {
+  const urlID = req.params.id;
+  const user_id = req.cookies.user_id;
+
+  if (!user_id) { //check if user is logged in
+    return res.status(400).send("Please log in");
+  };
+
+  if (!urlDatabase[urlID]) { //check if URL ID exists in DB
+    return res.status(404).send("URL ID not found");
+  };
+
+  if (urlDatabase[urlID].userID !== user_id) { // check if user owns the URL
+    return res.status(403).send("You don't own this URL");
+  };
+
   delete urlDatabase[req.params.id];
   res.redirect("/urls");
 });
@@ -239,7 +296,7 @@ app.post("/register", (req, res) => {
   const password = req.body.password;
 
   if (!email || !password) {
-    res.status(400).send("Provide email and a password");
+    return res.status(400).send("Provide email and a password");
   };
 
   //lookup the user based on provided email
