@@ -49,7 +49,7 @@ let strLength = 6;
 
 //GET the home route
 app.get("/", (req, res) => {
-  res.send("/login");
+  res.redirect('/login');
 });
 
 
