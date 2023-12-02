@@ -66,16 +66,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//POST method to handle the urls route
-// app.post('/urls', (req, res) => {
-//   const newId = generateRandomString(strLen, characterSet);
-//   const newLongURL = req.body.longURL;
-//   const { user_id } = req.session;
-//   //Saving a page links short/long URLs to our "DB"
-//   urlDatabase[newId] = { longURL: newLongURL, userID: user_id };
-//   res.redirect(`/urls/${newId}`);
-// });
-
 
 //display a form for creating a new URL
 app.get("/urls/new", (req, res) => {
@@ -101,7 +91,7 @@ app.post("/urls", (req, res) => {
 
   if (!user_id) {
     return res.redirect('/login');
-  }; 
+  };
 
   // //save data to our data base
   urlDatabase[newShortId] = { longURL: newLongURL, userID: user_id };
@@ -201,14 +191,10 @@ app.post("/urls/:id/delete", (req, res) => {
 app.get("/login", (req, res) => {
   const user_id = req.session.user_id;
 
-  // if (user_id) {
-  //   return res.redirect('/urls');
-  // };
-
   if (users[user_id]) {
     return res.redirect('/urls');
   };
- 
+
   const templateVars = {
     user: user_id,
   };
@@ -236,28 +222,12 @@ app.post("/login", (req, res) => {
   if (user.email !== email || !bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Incorrect email or password");
   };
-  // if (!bcrypt.compareSync(password, user.password)) {
-  //   return res.status(403).send("Incorrect email or password");
-  // };
 
   //happy path
   req.session.user_id = user.id;
   res.redirect("/urls");
 
 });
-
-// //Passing in the username to the page header
-// app.get('/urls', (req, res) => {
-//   const { user_id } = req.session;
-//   if (!user_id) {
-//     return res.status(400).send('User is not logged in!');
-//   };
-//   const templateVars = {
-//     urls: urlDatabase,
-//     user: users[user_id],
-//   };
-//   res.render('urls_index', templateVars);
-// });
 
 
 //POST to handle user logout
