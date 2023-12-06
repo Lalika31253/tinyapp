@@ -62,7 +62,7 @@ app.get("/urls", (req, res) => {
   };
 
   //get URLs specific to the logged in user 
-  const usersUrls = urlsForUser (urlDatabase, user_id);
+  const usersUrls = urlsForUser(urlDatabase, user_id);
   const templateVars = {
     urls: usersUrls, //pass URLs
     user: users[user_id] //pass user from the object
@@ -103,7 +103,16 @@ app.post("/urls", (req, res) => {
 
 //GET route to handle short urls
 app.get("/u/:id", (req, res) => {
+
+  if (!urlDatabase[req.params.id]) { //check if URL is found
+    return res.status(404).send("No link with this ID found!");
+  };
+
   const longURL = urlDatabase[req.params.id].longURL;
+  // Check if the long URL is not found
+  if (!longURL) {
+    return res.status(404).send("No long URL found for this ID!");
+  }
   res.redirect(longURL);
 });
 
@@ -142,7 +151,7 @@ app.post("/urls/:id", (req, res) => {
     return res.status(400).send("Please log in");
   };
 
-  if (!urlDatabase[urlID]) { 
+  if (!urlDatabase[urlID]) {
     return res.status(403).send("No link with this ID found!");
   };
 
@@ -267,7 +276,7 @@ app.post("/register", (req, res) => {
   const salt = bcrypt.genSaltSync(10);
   const hashed = bcrypt.hashSync(password, salt);
 
-  if (!email || !password) { 
+  if (!email || !password) {
     return res.status(400).send("Provide email and a password");
   };
 
