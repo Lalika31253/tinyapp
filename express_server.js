@@ -119,9 +119,7 @@ app.get("/u/:id", (req, res) => {
 
 //route to display a single URL and its details
 app.get("/urls/:id", (req, res) => {
-
   const user_id = req.session.user_id;
-
   //check if the user is not the owner of the URL
   if (user_id !== (urlDatabase[req.params.id] && urlDatabase[req.params.id].userID)) {
     return res.redirect('/login');
